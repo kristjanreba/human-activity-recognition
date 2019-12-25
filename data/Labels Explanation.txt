@@ -5,5 +5,5 @@ Stand-to-walk - 4
 Stand-to-sit - 5
 Sit-to-stand - 6
 Walk-to-stand - 7
-St-to-walk - 8
+Sit-to-walk - 8
 Walk-to-sit - 9
