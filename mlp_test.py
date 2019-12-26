@@ -34,9 +34,7 @@ if __name__ == '__main__':
     print('MLP train accuracy: ', clf.score(x_train, y_train))
     print('MLP test accuracy: ', clf.score(x_test, y_test))
 
-
     y_pred = clf.predict(x_test)
-    cm = confusion_matrix(y_test, y_pred, normalize='true')
-    #plt.figure(figsize = (10,7))
+    cm = confusion_matrix(y_test, y_pred)
     sn.heatmap(cm, annot=True)
     plt.show()
