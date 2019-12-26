@@ -80,7 +80,7 @@ if __name__ == '__main__':
     x_train, y_train, x_test, y_test = load_data(num_classes, timesteps)
 
     print('creating model...')
-    model = create_model(data_dim, timesteps)
+    model = create_LSTM_model(data_dim, timesteps)
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     print('training...')
     model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, verbose=2)
