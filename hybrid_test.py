@@ -4,13 +4,50 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import confusion_matrix, accuracy_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 
 from utils import load_data_sample, load_data, data_info
 
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Conv2D, MaxPooling2D, Flatten, TimeDistributed
+
+
+def CV(x, y):
+    batch_size = 256
+    epochs = 1
+    timesteps = 32
+    data_dim = 12
+    num_classes = 9
+
+    accs = []
+    kf = KFold(n_splits=5)
+    for train_index, test_index in kf.split(x):
+        x_train, x_test = x[train_index], x[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        print('creating model...')
+        model = create_LSTM_model(data_dim, timesteps)
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        print('training...')
+        model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, verbose=2)
+        
+        print('making prediction...')
+        y_pred_train = model.predict_classes(x_train)
+        y_pred_test = model.predict_classes(x_test)
+
+        y_train = np.argmax(y_train, axis=1)
+        y_test = np.argmax(y_test, axis=1)
+
+        train_acc = accuracy_score(y_train, y_pred_train)
+        test_acc = accuracy_score(y_test, y_pred_test)
+        print('LSTM train accuracy: ', train_acc)
+        print('LSTM test accuracy: ', test_acc)
+        accs.append(test_acc)
+
+    std = np.std(accs)
+    mean = np.mean(accs)
+    print('Acc = {} +/- {}'.format(mean, std))
 
 
 def load_data_sample(num_classes, timesteps=1):
@@ -24,8 +61,9 @@ def load_data_sample(num_classes, timesteps=1):
     print('x.shape =', x.shape)
     print('y.shape =', y.shape)
     y = keras.utils.to_categorical(y, num_classes=num_classes)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
-    return x_train, y_train, x_test, y_test
+    #x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+    #return x_train, y_train, x_test, y_test
+    return x, y
 
 
 def load_data(num_classes, timesteps=1):
@@ -46,8 +84,9 @@ def load_data(num_classes, timesteps=1):
     print('x.shape =', x.shape)
     print('y.shape =', y.shape)
     y = keras.utils.to_categorical(y, num_classes=num_classes)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
-    return x_train, y_train, x_test, y_test
+    #x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+    #return x_train, y_train, x_test, y_test
+    return x, y
 
 
 def create_dataset(df, timesteps=1):
@@ -66,19 +105,25 @@ def create_LSTM_model(data_dim, timesteps=1):
     model.add(LSTM(32, return_sequences=True))  # returns a sequence of vectors of dimension 32
     model.add(LSTM(32, return_sequences=False)) # return a single vector of dimension 32
     model.add(Dense(9, activation='softmax'))
-    model.summary()
+    #model.summary()
     return model
 
 
 if __name__ == '__main__':
+    num_classes = 9
+    timesteps = 32
+    x, y = load_data_sample(num_classes, timesteps)
+    CV(x, y)
+
+    '''
     batch_size = 32
     epochs = 15
     timesteps = 32
     data_dim = 12
     num_classes = 9
+    '''
 
-    x_train, y_train, x_test, y_test = load_data(num_classes, timesteps)
-
+    '''
     print('creating model...')
     model = create_LSTM_model(data_dim, timesteps)
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -98,3 +143,4 @@ if __name__ == '__main__':
     cm = confusion_matrix(y_test, y_pred_test)
     sn.heatmap(cm, annot=True)
     plt.show()
+    '''
