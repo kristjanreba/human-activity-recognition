@@ -14,8 +14,8 @@ from keras.layers import Dense, LSTM, Conv2D, MaxPooling2D, Flatten, TimeDistrib
 
 
 def CV(x, y):
-    batch_size = 256
-    epochs = 1
+    batch_size = 32
+    epochs = 3
     timesteps = 32
     data_dim = 12
     num_classes = 9
@@ -102,7 +102,7 @@ def create_dataset(df, timesteps=1):
 def create_LSTM_model(data_dim, timesteps=1):
     model = Sequential()
     model.add(LSTM(32, return_sequences=True, input_shape=(timesteps, data_dim)))  # returns a sequence of vectors of dimension 32
-    model.add(LSTM(32, return_sequences=True))  # returns a sequence of vectors of dimension 32
+    #model.add(LSTM(32, return_sequences=True))  # returns a sequence of vectors of dimension 32
     model.add(LSTM(32, return_sequences=False)) # return a single vector of dimension 32
     model.add(Dense(9, activation='softmax'))
     #model.summary()
