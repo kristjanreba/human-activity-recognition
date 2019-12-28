@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import train_test_split, KFold
 
-from utils import load_data_sample, load_data, data_info
-
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Conv2D, MaxPooling2D, Flatten, TimeDistributed
@@ -21,7 +19,7 @@ def CV(x, y):
     num_classes = 9
 
     accs = []
-    kf = KFold(n_splits=5)
+    kf = KFold(n_splits=5, random_state=1, shuffle=True)
     for train_index, test_index in kf.split(x):
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
@@ -47,7 +45,7 @@ def CV(x, y):
 
     std = np.std(accs)
     mean = np.mean(accs)
-    print('Acc = {} +/- {}'.format(mean, std))
+    print('LSTM acc = {} +/- {}'.format(mean, std))
 
 
 def load_data_sample(num_classes, timesteps=1):

@@ -15,8 +15,7 @@ def load_data_sample():
     df_x = df.drop(['timestamp', 'label'], axis=1)
     print('df_x shape: ', df_x.shape)
     df_y = df['label']
-    x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size=0.33, random_state=42)
-    return x_train, y_train, x_test, y_test
+    return df_x.values, df_y.values
 
 
 def load_data():
@@ -33,17 +32,15 @@ def load_data():
     df_x = df.drop(['timestamp', 'label'], axis=1)
     print('df_x shape: ', df_x.shape)
     df_y = df['label']
-    x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size=0.33, random_state=42)
-    return x_train, y_train, x_test, y_test
-
-
-def data_info():
-    #print(df.info())
-    #print(df.head())
-    #print(df.describe())
-    print('class distribution ', y_test.value_counts().values)
-    print('class distribution proportional ', y_test.value_counts().values / y_test.value_counts().values.sum())
     
+    # Majority class classifier
+    acc = df_y.value_counts().values[0] / df_y.value_counts().values.sum()
+    print('Majority class classifier accuracy:', acc)
+    print('class distribution ', df_y.value_counts().values)
+    print('class distribution proportional ', df_y.value_counts().values / df_y.value_counts().values.sum())
+    
+    return df_x.values, df_y.values
+
 
 if __name__ == '__main__':
     pass
