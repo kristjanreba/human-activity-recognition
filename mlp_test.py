@@ -36,16 +36,6 @@ def CV(x, y):
 
 
 if __name__ == '__main__':
-    class_labels = ['Standing',
-                    'Sitting',
-                    'Walking',
-                    'Stand-to-walk',
-                    'Stand-to-sit',
-                    'Sit-to-stand',
-                    'Walk-to-stand',
-                    'Sit-to-walk',
-                    'Walk-to-sit']
-
     x, y = load_data()
     CV(x, y)
 

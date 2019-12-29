@@ -3,12 +3,20 @@ import pandas as pd
 import seaborn as sn
 import matplotlib.pyplot as plt
 
+from sklearn.datasets import make_classification
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import train_test_split, KFold
+from imblearn.over_sampling import RandomOverSampler
 
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Conv2D, MaxPooling2D, Flatten, TimeDistributed
+
+
+def unison_shuffled_copies(a, b):
+    assert len(a) == len(b)
+    p = np.random.permutation(len(a))
+    return a[p], b[p]
 
 
 def CV(x, y, timesteps):
@@ -75,15 +83,10 @@ def load_data(num_classes, timesteps=1):
     df = pd.concat([df1, df2, df3, df4, df5, df6, df7])
     df.drop(['timestamp'], axis=1, inplace=True)
     df.dropna(axis=0, inplace=True)
-    df = (df - df.mean()) / df.std() # standard normalization
-    #print(df.shape)
-    #print('creating dataset...')
     x, y = create_dataset(df, timesteps)
-    #print('x.shape =', x.shape)
-    #print('y.shape =', y.shape)
+    #x = (x - x.mean()) / x.std() # standard normalization
+    x, y = unison_shuffled_copies(x, y)
     y = keras.utils.to_categorical(y, num_classes=num_classes)
-    #x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
-    #return x_train, y_train, x_test, y_test
     return x, y
 
 
@@ -108,30 +111,84 @@ def create_LSTM_model(data_dim, timesteps=1):
 
 
 if __name__ == '__main__':
+    '''
     num_classes = 9
-    #timesteps = 32
+    batch_size = 32
+    epochs = 4
+    data_dim = 12
     ts = [2,4,8,16,32,64,128,256]
+
+    accs = []
     for timesteps in ts:
         print('Current timesteps: ', timesteps)
         x, y = load_data(num_classes, timesteps)
-        CV(x, y, timesteps)
+        #CV(x, y, timesteps)
 
+        x, y = load_data(num_classes, timesteps=timesteps)
+
+        # split the data into train and test sets
+        train_size = int(0.7 * x.shape[0])
+        x_train = x[:train_size,:,:]
+        y_train = y[:train_size,:]
+        x_test = x[train_size:,:,:]
+        y_test = y[train_size:,:]
+
+        # oversample the train set
+        ros = RandomOverSampler(random_state=0)
+        x, y = ros.fit_resample(x, y)
+
+        # create and train the model
+        model = create_LSTM_model(data_dim, timesteps)
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, verbose=2)
+
+        # evaluate the model
+        y_pred_train = model.predict_classes(x_train)
+        y_pred_test = model.predict_classes(x_test)
+
+        y_train = np.argmax(y_train, axis=1)
+        y_test = np.argmax(y_test, axis=1)
+
+        print('LSTM train accuracy: ', accuracy_score(y_train, y_pred_train))
+        print('LSTM test accuracy: ', accuracy_score(y_test, y_pred_test))
+        accs.append(accuracy_score(y_test, y_pred_test))
+
+    # plot bar chart of class distribution
+    height = accs
+    y_pos = np.arange(len(ts))
+    plt.barh(y_pos, height, align='center', alpha=0.5)
+    plt.yticks(y_pos, ts)
+    plt.xlabel('Accuracy')
+    plt.title('Window size')
+    plt.show()
     '''
+
+    
     batch_size = 32
-    epochs = 15
+    epochs = 4
     timesteps = 32
     data_dim = 12
     num_classes = 9
-    '''
 
-    '''
-    print('creating model...')
+    x, y = load_data(num_classes, timesteps=timesteps)
+
+    train_size = int(0.7 * x.shape[0])
+    x_train = x[:train_size,:,:]
+    y_train = y[:train_size,:]
+    x_test = x[train_size:,:,:]
+    y_test = y[train_size:,:]
+
+    # oversample the dataset
+    ros = RandomOverSampler(random_state=0)
+    x_train_orig_shape = x_train.shape
+    y_train_orig_shape = y_train.shape
+    x_train = np.reshape(x_train, (x_train.shape[0], -1))
+    x_train, y_train = ros.fit_resample(x_train, y_train)
+    x_train = np.reshape(x_train, (-1, x_train_orig_shape[1], x_train_orig_shape[2]))
+    
     model = create_LSTM_model(data_dim, timesteps)
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    print('training...')
     model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, verbose=2)
-    
-    print('making prediction...')
     y_pred_train = model.predict_classes(x_train)
     y_pred_test = model.predict_classes(x_test)
 
@@ -140,7 +197,9 @@ if __name__ == '__main__':
 
     print('LSTM train accuracy: ', accuracy_score(y_train, y_pred_train))
     print('LSTM test accuracy: ', accuracy_score(y_test, y_pred_test))
-    
+
+    '''
+    # plot confusion matrix
     cm = confusion_matrix(y_test, y_pred_test)
     sn.heatmap(cm, annot=True)
     plt.show()

@@ -7,6 +7,7 @@ from sklearn.model_selection import validation_curve
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 
+import matplotlib.pyplot as plt
 
 def load_data_sample():
     print('loading data...')
@@ -19,6 +20,16 @@ def load_data_sample():
 
 
 def load_data():
+    class_labels = ['Standing',
+                'Sitting',
+                'Walking',
+                'Stand-to-walk',
+                'Stand-to-sit',
+                'Sit-to-stand',
+                'Walk-to-stand',
+                'Sit-to-walk',
+                'Walk-to-sit']
+
     print('loading data...')
     df1 = pd.read_excel('data/Alwin_Round_1_raw_data_2019-10-21_11-2-5_sensor2.xlsx')
     df2 = pd.read_excel('data/Alwin_Round_2_raw_data_2019-10-21_11-9-2_sensor2.xlsx')
@@ -29,7 +40,10 @@ def load_data():
     df7 = pd.read_excel('data/Thu_Round_2_raw_data_2019-10-21_10-40-38_sensor2.xlsx')
     df = pd.concat([df1, df2, df3, df4, df5, df6, df7])
     df.dropna(axis=0, inplace=True)
+
     df_x = df.drop(['timestamp', 'label'], axis=1)
+    df_x = (df_x - df_x.mean()) / df_x.std() # standard normalization
+
     print('df_x shape: ', df_x.shape)
     df_y = df['label']
     
@@ -37,10 +51,22 @@ def load_data():
     acc = df_y.value_counts().values[0] / df_y.value_counts().values.sum()
     print('Majority class classifier accuracy:', acc)
     print('class distribution ', df_y.value_counts().values)
-    print('class distribution proportional ', df_y.value_counts().values / df_y.value_counts().values.sum())
+    #print('class distribution proportional ', df_y.value_counts().values / df_y.value_counts().values.sum())
     
+    '''
+    # plot bar chart of class distribution
+    height = df_y.value_counts().values
+    y_pos = np.arange(len(class_labels))
+    plt.figure(figsize=(7, 7))
+    plt.barh(y_pos, height, align='center', alpha=0.5)
+    plt.yticks(y_pos, class_labels)
+    plt.xlabel('Samples')
+    plt.title('Class distribution')
+    plt.show()
+    '''
+
     return df_x.values, df_y.values
 
 
 if __name__ == '__main__':
-    pass
+    load_data()
