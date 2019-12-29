@@ -11,10 +11,9 @@ from keras.models import Sequential
 from keras.layers import Dense, LSTM, Conv2D, MaxPooling2D, Flatten, TimeDistributed
 
 
-def CV(x, y):
+def CV(x, y, timesteps):
     batch_size = 32
     epochs = 3
-    timesteps = 32
     data_dim = 12
     num_classes = 9
 
@@ -24,13 +23,13 @@ def CV(x, y):
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        print('creating model...')
+        #print('creating model...')
         model = create_LSTM_model(data_dim, timesteps)
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        print('training...')
+        #print('training...')
         model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, verbose=2)
         
-        print('making prediction...')
+        #print('making prediction...')
         y_pred_train = model.predict_classes(x_train)
         y_pred_test = model.predict_classes(x_test)
 
@@ -76,11 +75,12 @@ def load_data(num_classes, timesteps=1):
     df = pd.concat([df1, df2, df3, df4, df5, df6, df7])
     df.drop(['timestamp'], axis=1, inplace=True)
     df.dropna(axis=0, inplace=True)
-    print(df.shape)
-    print('creating dataset...')
+    df = (df - df.mean()) / df.std() # standard normalization
+    #print(df.shape)
+    #print('creating dataset...')
     x, y = create_dataset(df, timesteps)
-    print('x.shape =', x.shape)
-    print('y.shape =', y.shape)
+    #print('x.shape =', x.shape)
+    #print('y.shape =', y.shape)
     y = keras.utils.to_categorical(y, num_classes=num_classes)
     #x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
     #return x_train, y_train, x_test, y_test
@@ -100,7 +100,7 @@ def create_dataset(df, timesteps=1):
 def create_LSTM_model(data_dim, timesteps=1):
     model = Sequential()
     model.add(LSTM(32, return_sequences=True, input_shape=(timesteps, data_dim)))  # returns a sequence of vectors of dimension 32
-    #model.add(LSTM(32, return_sequences=True))  # returns a sequence of vectors of dimension 32
+    model.add(LSTM(32, return_sequences=True))  # returns a sequence of vectors of dimension 32
     model.add(LSTM(32, return_sequences=False)) # return a single vector of dimension 32
     model.add(Dense(9, activation='softmax'))
     #model.summary()
@@ -109,9 +109,12 @@ def create_LSTM_model(data_dim, timesteps=1):
 
 if __name__ == '__main__':
     num_classes = 9
-    timesteps = 32
-    x, y = load_data_sample(num_classes, timesteps)
-    CV(x, y)
+    #timesteps = 32
+    ts = [2,4,8,16,32,64,128,256]
+    for timesteps in ts:
+        print('Current timesteps: ', timesteps)
+        x, y = load_data(num_classes, timesteps)
+        CV(x, y, timesteps)
 
     '''
     batch_size = 32

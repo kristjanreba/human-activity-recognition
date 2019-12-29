@@ -30,4 +30,4 @@ def CV(x, y):
 
 if __name__ == '__main__':
     x, y = load_data()
-    CV(x, y)
+    #CV(x, y)
