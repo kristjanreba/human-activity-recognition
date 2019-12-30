@@ -2,3 +2,35 @@ Majority class classifier accuracy: 0.4984768897307219
 MLP acc = 0.946075996281732 +/- 0.002124617921631087
 SVM acc = 0.9339789998797468 +/- 0.0013516237806805104
 LSTM acc = 0.9601347535972234 +/- 0.0076685234747779505
+
+
+Current timesteps:  2
+LSTM train accuracy:  0.9203687947219393
+LSTM test accuracy:  0.9215973442686975
+Current timesteps:  4
+LSTM train accuracy:  0.9277454631683196
+LSTM test accuracy:  0.9248519169433054
+Current timesteps:  8
+LSTM train accuracy:  0.9324024606285483
+LSTM test accuracy:  0.9327886993881005
+Current timesteps:  16
+LSTM train accuracy:  0.9460960060265335
+LSTM test accuracy:  0.9432328624438513
+Current timesteps:  32
+LSTM train accuracy:  0.96280276816609
+LSTM test accuracy:  0.9607383533548198
+Current timesteps:  64
+LSTM train accuracy:  0.9669220784658544
+LSTM test accuracy:  0.9648625765272894
+Current timesteps:  128
+LSTM train accuracy:  0.9701277843725997
+LSTM test accuracy:  0.9678375912408759
+Current timesteps:  256
+LSTM train accuracy:  0.9715584143186744
+LSTM test accuracy:  0.9699836867862969
+accs:  [0.9215973442686975, 0.9248519169433054, 0.9327886993881005, 0.9432328624438513, 0.9607383533548198, 0.9648625765272894, 0.9678375912408759, 0.9699836867862969]
+
+
+SMOTE oversampling
+LSTM train accuracy:  0.9725588469978057
+LSTM test accuracy:  0.9705049321222776

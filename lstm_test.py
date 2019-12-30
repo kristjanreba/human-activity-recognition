@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import make_classification
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.model_selection import train_test_split, KFold
-from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler, SMOTE
 
 import keras
 from keras.models import Sequential
@@ -116,15 +116,13 @@ if __name__ == '__main__':
     batch_size = 32
     epochs = 4
     data_dim = 12
-    ts = [2,4,8,16,32,64,128,256]
+    ts = [512]
 
     accs = []
     for timesteps in ts:
         print('Current timesteps: ', timesteps)
         x, y = load_data(num_classes, timesteps)
         #CV(x, y, timesteps)
-
-        x, y = load_data(num_classes, timesteps=timesteps)
 
         # split the data into train and test sets
         train_size = int(0.7 * x.shape[0])
@@ -134,8 +132,8 @@ if __name__ == '__main__':
         y_test = y[train_size:,:]
 
         # oversample the train set
-        ros = RandomOverSampler(random_state=0)
-        x, y = ros.fit_resample(x, y)
+        #sm = SMOTE(random_state=0)
+        #x, y = sm.fit_resample(x, y)
 
         # create and train the model
         model = create_LSTM_model(data_dim, timesteps)
@@ -153,20 +151,13 @@ if __name__ == '__main__':
         print('LSTM test accuracy: ', accuracy_score(y_test, y_pred_test))
         accs.append(accuracy_score(y_test, y_pred_test))
 
-    # plot bar chart of class distribution
-    height = accs
-    y_pos = np.arange(len(ts))
-    plt.barh(y_pos, height, align='center', alpha=0.5)
-    plt.yticks(y_pos, ts)
-    plt.xlabel('Accuracy')
-    plt.title('Window size')
-    plt.show()
+    print('accs = ', accs)
     '''
 
-    
+    '''
     batch_size = 32
     epochs = 4
-    timesteps = 32
+    timesteps = 256
     data_dim = 12
     num_classes = 9
 
@@ -179,11 +170,11 @@ if __name__ == '__main__':
     y_test = y[train_size:,:]
 
     # oversample the dataset
-    ros = RandomOverSampler(random_state=0)
+    sm = SMOTE(random_state=0)
     x_train_orig_shape = x_train.shape
     y_train_orig_shape = y_train.shape
     x_train = np.reshape(x_train, (x_train.shape[0], -1))
-    x_train, y_train = ros.fit_resample(x_train, y_train)
+    x_train, y_train = sm.fit_resample(x_train, y_train)
     x_train = np.reshape(x_train, (-1, x_train_orig_shape[1], x_train_orig_shape[2]))
     
     model = create_LSTM_model(data_dim, timesteps)
@@ -197,6 +188,8 @@ if __name__ == '__main__':
 
     print('LSTM train accuracy: ', accuracy_score(y_train, y_pred_train))
     print('LSTM test accuracy: ', accuracy_score(y_test, y_pred_test))
+    '''
+
 
     '''
     # plot confusion matrix
@@ -204,3 +197,17 @@ if __name__ == '__main__':
     sn.heatmap(cm, annot=True)
     plt.show()
     '''
+
+
+    # plot bar chart of class distribution
+    ts = [2, 4, 8, 16, 32, 64, 128, 256]
+    accs = [0.9215973442686975, 0.9248519169433054, 0.9327886993881005, 0.9432328624438513, 0.9607383533548198, 0.9648625765272894, 0.9678375912408759, 0.9699836867862969]
+    height = accs
+    y_pos = np.arange(len(ts))
+    plt.barh(y_pos, height, align='center', alpha=0.5)
+    plt.yticks(y_pos, ts)
+    plt.ylabel('Window size')
+    plt.xlabel('Accuracy')
+    plt.xlim((0.9, 1.0))
+    plt.title('Increasing window size')
+    plt.show()
