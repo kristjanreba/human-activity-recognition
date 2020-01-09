@@ -9,6 +9,19 @@ from sklearn.svm import SVC
 
 import matplotlib.pyplot as plt
 
+
+def create_dataset(df, window_size=1):
+    data = df.values
+    x, y = [], []
+    for i in range(len(df)-window_size-1):
+        a = data[i:(i+window_size), :-1].reshape(1,-1)
+        x.append(a)
+        y.append(data[i + window_size, -1] - 1)
+    x = np.array(x)
+    y = np.array(y)
+    return x.reshape(x.shape[0],-1), y
+
+
 def load_data_sample():
     print('loading data...')
     df = pd.read_excel('data/Alwin_Round_1_raw_data_2019-10-21_11-2-5_sensor2.xlsx')
@@ -19,7 +32,7 @@ def load_data_sample():
     return df_x.values, df_y.values
 
 
-def load_data():
+def load_data(window_size=1):
     class_labels = ['Standing',
                 'Sitting',
                 'Walking',
@@ -31,6 +44,7 @@ def load_data():
                 'Walk-to-sit']
 
     print('loading data...')
+    '''
     df1 = pd.read_excel('data/Alwin_Round_1_raw_data_2019-10-21_11-2-5_sensor2.xlsx')
     df2 = pd.read_excel('data/Alwin_Round_2_raw_data_2019-10-21_11-9-2_sensor2.xlsx')
     df3 = pd.read_excel('data/Alwin_Round_3_raw_data_2019-10-21_11-16-23_sensor2.xlsx')
@@ -40,17 +54,20 @@ def load_data():
     df7 = pd.read_excel('data/Thu_Round_2_raw_data_2019-10-21_10-40-38_sensor2.xlsx')
     df = pd.concat([df1, df2, df3, df4, df5, df6, df7])
     df.dropna(axis=0, inplace=True)
-
-    df_x = df.drop(['timestamp', 'label'], axis=1)
-    df_x = (df_x - df_x.mean()) / df_x.std() # standard normalization
-
-    print('df_x shape: ', df_x.shape)
-    df_y = df['label']
+    df.drop(['timestamp'], axis=1, inplace=True)
+    df.to_csv('data/merged.csv')
+    '''
+    df = pd.read_csv('data/merged.csv')
+    if window_size == 1:
+        X = df.drop(['label'], axis=1).values
+        y = df['label'].values - 1 # labels start at 0
+    else:
+        X, y = create_dataset(df, window_size=window_size)
     
     # Majority class classifier
-    acc = df_y.value_counts().values[0] / df_y.value_counts().values.sum()
-    print('Majority class classifier accuracy:', acc)
-    print('class distribution ', df_y.value_counts().values)
+    #acc = df_y.value_counts().values[0] / df_y.value_counts().values.sum()
+    #print('Majority class classifier accuracy:', acc)
+    #print('class distribution ', df_y.value_counts().values)
     #print('class distribution proportional ', df_y.value_counts().values / df_y.value_counts().values.sum())
     
     '''
@@ -65,7 +82,7 @@ def load_data():
     plt.show()
     '''
 
-    return df_x.values, df_y.values
+    return X, y
 
 
 if __name__ == '__main__':

@@ -131,10 +131,6 @@ if __name__ == '__main__':
         x_test = x[train_size:,:,:]
         y_test = y[train_size:,:]
 
-        # oversample the train set
-        #sm = SMOTE(random_state=0)
-        #x, y = sm.fit_resample(x, y)
-
         # create and train the model
         model = create_LSTM_model(data_dim, timesteps)
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -154,10 +150,10 @@ if __name__ == '__main__':
     print('accs = ', accs)
     '''
 
-    '''
+
     batch_size = 32
     epochs = 4
-    timesteps = 256
+    timesteps = 512
     data_dim = 12
     num_classes = 9
 
@@ -188,7 +184,7 @@ if __name__ == '__main__':
 
     print('LSTM train accuracy: ', accuracy_score(y_train, y_pred_train))
     print('LSTM test accuracy: ', accuracy_score(y_test, y_pred_test))
-    '''
+
 
 
     '''
@@ -198,7 +194,7 @@ if __name__ == '__main__':
     plt.show()
     '''
 
-
+    '''
     # plot bar chart of class distribution
     ts = [2, 4, 8, 16, 32, 64, 128, 256]
     accs = [0.9215973442686975, 0.9248519169433054, 0.9327886993881005, 0.9432328624438513, 0.9607383533548198, 0.9648625765272894, 0.9678375912408759, 0.9699836867862969]
@@ -211,3 +207,4 @@ if __name__ == '__main__':
     plt.xlim((0.9, 1.0))
     plt.title('Increasing window size')
     plt.show()
+    '''
